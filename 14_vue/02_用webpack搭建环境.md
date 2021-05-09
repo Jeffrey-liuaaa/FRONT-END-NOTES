@@ -1,4 +1,5 @@
 ## 1. 初始化项目
+
 ```js
 1). 生成package.json
     yarn init -y
@@ -12,6 +13,7 @@
 ```
 
 ## 2. webpack基本使用
+
 ```js
 1). 下载依赖包
     yarn add -D webpack webpack-cli // webpack用来编译打包 webpack-cli用来提供webpack命令
@@ -49,18 +51,19 @@
     }
 
 3). 生成环境打包并运行
-    配置打包命令:  "build": "webpack --mode production"
+    在package.json中配置打包命令:  "build": "webpack --mode production"
     打包项目: yarn build
-    运行打包项目: serve dist
+    运行打包项目: serve dist  // 前提是要先下载server包
 ```
 
 ## 3. 开发环境运行
+
 ```js
 1). 现在的问题:
     每次修改项目代码后, 必须重新打包, 重新运行
 
 2). 下载依赖包
-    yarn add -D webpack-dev-server  //自动打包运行，在浏览器显示运行结果
+    yarn add -D webpack-dev-server  // 自动打包运行，在浏览器显示运行结果
 
 3). 配置开发服务器
     devServer: {
@@ -73,11 +76,12 @@
     devtool: 'cheap-module-eval-source-map',
 
 5). 开发环境运行
-    配置命令: "dev": "webpack-dev-server --mode development"
+    在package.json中配置命令: "dev": "webpack-dev-server --mode development"
     执行命令: yarn dev
 ```
 
 ## 4. 打包处理 ES6/CSS/图片
+
 ```js
 1). 处理ES6 -> ES5
     a. 下载依赖包
@@ -134,6 +138,7 @@
 ```
 
 ## 5. 搭建vue的环境
+
 ```js
 0). 文档:
     https://vue-loader.vuejs.org/zh/
@@ -174,11 +179,83 @@
 ```
 
 ## 区分使用生产环境与开发环境
-    使用生产环境:
-        npm run build   ==> webpack
-        1). 在内存中进行编译打包, 生成内存中的打包文件
-        2). 保存到本地(在本地生成打包文件)   ===> 此时还不能通过浏览器来访问, 需要手动启动服务器运行
-    使用开发环境
-        npm run dev   ==> webpack-dev-server
-        1). 在内存中进行编译打包, 生成内存中的打包文件
-        2). 启动服务器, 运行内存中的打包文件   ===> 可以通过浏览器虚拟路径访问
+
+```js
+使用生产环境:
+    npm run build   ==> webpack
+    1). 在内存中进行编译打包, 生成内存中的打包文件
+    2). 保存到本地(在本地生成打包文件)   ===> 此时还不能通过浏览器来访问, 需要手动启动服务器运行
+使用开发环境
+    npm run dev   ==> webpack-dev-server
+    1). 在内存中进行编译打包, 生成内存中的打包文件
+    2). 启动服务器, 运行内存中的打包文件(不生成本地打包文件)   ===> 可以通过浏览器虚拟路径访问
+```
+
+## 6. 解决开发环境ajax请求跨域问题
+
+```js
+1). 利用webpack-dev-server进行请求代理转发
+    webpack-dev-server内部利用http-proxy-middle包对特定请求进行转发操作
+2). 配置:
+    devServer: {
+      proxy: {
+        // 处理以/api开头路径的请求
+        // '/api': 'http://localhost:4000'
+        '/api': {
+          target: 'http://localhost:4000', // 转发的目标地址
+          pathRewrite: {
+            '^/api' : ''  // 转发请求时去除路径前面的/api
+          },
+          changeOrigin: true, // 支持跨域
+        }
+      }
+    }
+```
+
+## 7. 配置async/await的编译环境
+
+```js
+1). 下载包
+    yarn add @babel/runtime-corejs2
+2). 配置
+    presets: [
+      ['@babel/preset-env', {
+        useBuiltIns: 'usage',
+        'corejs': 2 // 处理一些新语法的实现
+      }]
+    ]
+```
+
+## 8. 解决mint-ui按需引入配置异常的问题
+
+```js
+1). 文档上的配置
+        "plugins": [
+          ["component", [
+            {
+              "libraryName": "mint-ui",
+              "style": true
+            }
+          ]]
+        ]
+2). 异常信息:  
+    Error: .plugins[0][1] must be an object, false, or undefined
+3). 原因:
+    文档编写时, 是根据老的babel版本编写的, 新版本的babel配置有变化
+    以前是数组, 现在只能是对象
+4). 修正:
+    "plugins": [
+      ["component", {
+          "libraryName": "mint-ui",
+          "style": true
+      }]
+    ]
+```
+
+## 9.解决history模式路由请求404的问题
+
+```js
+ devServer: historyApiFallback: true, // 任意的 404 响应都被替代为 index.html
+ output: publicPath: '/', // 引入打包的文件时路径以/开头
+```
+

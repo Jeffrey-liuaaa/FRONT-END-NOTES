@@ -548,7 +548,7 @@ ES5 规范 9.2 节中定义了抽象操作 ToBoolean，列举了布尔强制类�
 ```
 {} 的 valueOf 结果为 {} ，toString 的结果为 "[object Object]"
 
-[] 的 valueOf 结果为 [] ，toString 的结果为 ""
+[] 的 valueOf 结果为 [] ，toString 的结果为 "" （空串）
 ```
 
 #### 21. 什么是假值对象？
