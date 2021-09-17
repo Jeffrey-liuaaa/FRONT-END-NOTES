@@ -4,6 +4,54 @@
 
 ## 题目
 
+0. 数组中重复的数字
+
+```js
+题目：
+在一个长度为 n 的数组 nums 里的所有数字都在 0～n-1 的范围内。数组中某些数字是重复的，但不知道有几个数字重复了，也不知道每个数字重复了几次。请找出数组中任意一个重复的数字。
+
+思路：
+
+	（1）方法一：使用哈希表实现，若哈希表中没有数组项则加入哈希表，若哈希表中存在则直接返回该项。
+  					 利用哈希表，时间复杂度为O(n), 空间复杂度为O(n)
+
+          
+    var findRepeatNumber = function(nums) {
+        // 利用哈希表，时间复杂度为O(n), 空间复杂度为O(n)
+        var map = new Map();
+        for(var i = 0; i < nums.length; i++) {
+            if(!map.has(nums[i])) {
+                map.set(nums[i], true);
+            }else {
+                return nums[i];
+            }
+        }
+    };
+
+	（2）方法二：本题比较特殊，联想到数组排序后数字i将出现在下标i的位置，可以有如下解法。
+  					时间复杂度为O(n)，空间复杂度为O(1)
+		var findRepeatNumber = function(nums) {
+        for(var i = 0; i < nums.length; i++) {
+            // 如果数字i没有出现在下标i的位置，先判断下标i位置的数字是否和当前数字相等；若相等，则找到重复数字，直接返回；若不相								等，则交换两个位置的数字，继续判断，直到数字i出现在下标i的位置（或者找到重复数字）
+            while(nums[i] !== i) {
+                if(nums[i] === nums[nums[i]]) {
+                    return nums[i];
+                }else{
+                    swap(i, nums[i]);
+                }          
+            }
+        }
+
+        function swap(a, b) {
+            var temp = nums[a];
+            nums[a] = nums[b];
+            nums[b] = temp;
+        }
+    };
+```
+
+
+
 1. 二维数组中的查找
 
 ```js
@@ -17,25 +65,26 @@
           这个合适的位置可以选择数组右上角/左下角位置（本题选用右上角位置）。这一种方式最坏情况下的时间复杂度为 O(n)。
 
     var findNumberIn2DArray = function(matrix, target) {
-        // 如果传入的是空数组或者matrix为空则返回false
-        if(matrix === null || matrix.length === 0) return false;
-        // 拿到输入数组的行数与列数
-        let rows = matrix.length;
-        let columns = matrix[0].length;
-        // 初始化要比较的数字的行与列（右上角）
-        let row = 0;
-        let column = columns-1;
-        while(row < rows && column >= 0) {
-            if(matrix[row][column] === target) {
-                return true;
-            }else if(matrix[row][column] > target) {
-                column--;
-            }else if(matrix[row][column] < target) {
-                row++;
-            }
-        }
-        return false;
-    };
+      // 边界条件不能忘，数组为null或者为空数组时直接返回false
+      if(matrix === null || matrix.length === 0) return false
+      // 取到行数和列数
+      var n = matrix.length, m = matrix[0].length;
+      // 选定初始位置为右上角
+      var i = 0, j = m-1;
+      // 终止条件是到左下角
+      while(i < n && j >= 0) {
+          if(matrix[i][j] === target) {
+              return true;
+          // 比目标值大，则向左推进
+          }else if(matrix[i][j] > target) {
+              j--;
+          // 比目标值小，则向下推进
+          }else if(matrix[i][j] < target) {
+              i++;
+          }
+      }
+      return false;
+  };
 
 （2）方法二：用js特有的数组方法实现  
   array.flat() 扁平化嵌套实现
@@ -75,23 +124,15 @@ str.replace(/\s/g,"%20")
 输入一个链表，从尾到头打印链表每个节点的值。
 
 思路一：
-利用栈来实现，首先根据头结点以此遍历链表节点，将节点加入到栈中。当遍历完成后，再将栈中元素弹出并打印，以此来实现。栈的
-实现可以利用 Array 的 push 和 pop 方法来模拟。
-
-    var reversePrint = function(head) {
-        let node = head;
-        // 用栈来实现 (先进后出，符合倒序打印)
-        let stack = [];
-        while(node != null) {
-            stack.push(node.val);
-            node = node.next;
+一次循环，头插数组。
+    
+		var reversePrint = function(head) {
+        var arr = [];
+        while(head) {
+            arr.unshift(head.val);
+            head = head.next;
         }
-        // 打印栈中元素
-        let result  = [];
-        for(let i = stack.length - 1; i >= 0; i--) {
-            result.push(stack[i]);
-        }
-        return result;
+        return arr;
     };
 
 思路二：
@@ -108,7 +149,7 @@ str.replace(/\s/g,"%20")
 
 4. 重建二叉树
 
-```
+```js
 
 题目：
 
@@ -121,11 +162,27 @@ str.replace(/\s/g,"%20")
 边部分就是根节点的左子树，右边部分就是根节点的右子树。因此我们可以分别截取对应的部分进行子树的递归构建。使用这种方式的
 时间复杂度为 O(n)，空间复杂度为 O(logn)。
 
+    var buildTree = function(preorder, inorder) {
+        if(preorder === null || inorder === null || preorder.length <= 0) return null;
+        var nodeVal = preorder[0];
+        var node = new TreeNode(nodeVal);
+        // 在中序遍历序列中查找前序遍历第一个元素（父节点）的下标
+        var i = 0 // i有两个含义，一个是根节点在中序遍历结果中的下标，另一个是当前左子树的节点个数
+        for(; i < inorder.length; i++) {
+            if(inorder[i] === nodeVal) {
+                break;
+            }
+        }
+        node.left = buildTree(preorder.slice(1, i+1), inorder.slice(0, i));
+        node.right = buildTree(preorder.slice(i+1), inorder.slice(i+1));
+        return node;
+    };
+
 ```
 
 5. 用两个栈实现队列
 
-```
+```js
 
 题目：
 
@@ -137,6 +194,41 @@ str.replace(/\s/g,"%20")
 将元素 push 进栈 1 中。当队列执行 pop 操作时，首先判断栈 2 是否为空，如果不为空则直接 pop 元素。如果栈 2 为空，则将栈 1 中
 的所有元素 pop 然后 push 到栈 2 中，然后再执行栈 2 的 pop 操作。
 
+    var CQueue = function() {
+        this.stack1 = [];
+        this.stack2 = [];
+    };
+
+    /** 
+     * @param {number} value
+     * @return {void}
+     */
+    CQueue.prototype.appendTail = function(value) {
+        this.stack1.push(value);
+    };
+
+    /**
+     * @return {number}
+     */
+    CQueue.prototype.deleteHead = function() {
+        // stack2不为空，直接弹出
+        // stack2为空，先把stack1里所有的元素压入stack2
+        // 判断stack2是否为空，stack2为空输出-1，不为空弹出最后一项
+        if(this.stack2.length){
+            return this.stack2.pop();
+        }else{
+            while(this.stack1.length > 0) {
+                this.stack2.push(this.stack1.pop());
+            }
+            if(!this.stack2.length){
+                return -1;
+            }else{
+                return this.stack2.pop();
+            }
+        }
+    };
+
+
 扩展：
 
 当使用两个长度不同的栈来模拟队列时，队列的最大长度为较短栈的长度的两倍。
@@ -145,7 +237,7 @@ str.replace(/\s/g,"%20")
 
 6. 旋转数组的最小数字
 
-```
+```js
 题目：
 
 把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。 输入一个非递减排序的数组的一个旋转，输出旋转数组的
@@ -156,8 +248,42 @@ str.replace(/\s/g,"%20")
 
 （1）我们输入的是一个非递减排序的数组的一个旋转，因此原始数组的值递增或者有重复。旋转之后原始数组的值一定和一个值相
 邻，并且不满足递增关系。因此我们就可以进行遍历，找到不满足递增关系的一对值，后一个值就是旋转数组的最小数字。
+时间复杂度为O(n)
 
-（2）二分法
+		var minArray = function(numbers) {
+        // 发现规律，遍历数组，出现第一个比前面的数字小的数即为最小数字
+        var i = 0;
+        // 数组只有一个元素，直接返回
+        if(numbers.length === 1) return numbers[0];
+        while(++i < numbers.length) {
+            if(numbers[i] < numbers[i-1]) {
+                return numbers[i];
+            }
+        }
+        // 找到最后还没有比前面的数小的，则第一项即为最小数字
+        return numbers[0];
+    };
+
+（2）二分法，时间复杂度为O(logn)
+
+    var minArray = function(numbers) {
+        if(numbers.length === 1) return numbers[0];
+        var left = 0, right = numbers.length-1;
+        while(left < right) {
+            var pivot = left + Math.floor((right-left)/2);
+            // 中间值比右边值小，则最小值在中间值前面，让右指针指到中间位置
+            if(numbers[pivot] < numbers[right]) {
+                right = pivot;
+            // 中间值比右边值大，则最小值在中间值后面，且让左指针指向中间位置的下一个位置
+            }else if(numbers[pivot] > numbers[right]) {
+                left = pivot+1;
+            // 中间值和右边值一样大，考虑特殊情况如 22202 ，让右指针左移一位
+            }else {
+                right--;
+            }
+        }
+        return numbers[left];
+    };		
 
 ```
 
@@ -166,7 +292,7 @@ str.replace(/\s/g,"%20")
 
 7. 斐波那契数列
 
-```
+```js
 
 题目：
 
@@ -176,12 +302,27 @@ str.replace(/\s/g,"%20")
 
 斐波那契数列的规律是，第一项为 0，第二项为 1，第三项以后的值都等于前面两项的和，因此我们可以通过循环的方式，不断通过叠
 加来实现第 n 项值的构建。通过循环而不是递归的方式来实现，时间复杂度降为了 O(n)，空间复杂度为 O(1)。
+双指针解法：
+
+    var fib = function(n) {
+        if(n === 0) return 0;
+        if(n === 1) return 1;
+        var pre = 0, cur = 1;
+        var sum = 0, index = 2;
+        while(index <= n) {
+            sum = (pre + cur) % 1000000007;
+            pre = cur;
+            cur = sum;
+            index++;
+        }
+        return sum;
+    };
 
 ```
 
 8. 跳台阶
 
-```
+```js
 
 题目：
 
@@ -193,6 +334,17 @@ str.replace(/\s/g,"%20")
 种是从 n-2 级跳上，因此 f(n) = f(n-1) + f(n-2)。
 
 和斐波那契数列类似，不过初始两项的值变为了 1 和 2，后面每项的值等于前面两项的和。
+动态规划解法：
+
+    var numWays = function(n) {
+        var dp = [];
+        dp[0] = 1;
+        dp[1] = 1;
+        for(var i = 2; i <= n; i++) {
+            dp[i] = (dp[i-1] + dp[i-2]) % 1000000007;
+        }
+        return dp[n];
+    };
 
 ```
 
@@ -220,6 +372,161 @@ f(n) =  | 1 ,(n=1 )
         | 2\*f(n-1),(n>=2)
 ```
 
+加：矩阵中的路径
+
+```js
+题目：
+
+请设计一个函数，用来判断在一个矩阵中是否存在一条包含某字符串所有字符的路径。路径可以从矩阵中的任意一个格子开始，每
+一步可以在矩阵中向左，向右，向上，向下移动一个格子。如果一条路径经过了矩阵中的某一个格子，则该路径不能再进入该格子
+。例如 a b c e 
+			s f c s 
+			a d e e 
+矩阵中包含一条字符串"bcced"的路径，但是矩阵中不包含"abcb"路径，因为字符串的
+第一个字符 b 占据了矩阵中的第一行第二个格子之后，路径不能再次进入该格子。
+
+解题思路：
+典型的dfs算法，第一步先遍历一遍board，寻找第一个符合的位置，然后再使用dfs递归，因为寻找路径，要记录一下路径，防止每次递归会回到之前的路径。
+
+/**
+ * @param {character[][]} board
+ * @param {string} word
+ * @return {boolean}
+ */
+var exist = function(board, word) {
+    var row = board.length;
+    var col = board[0].length;
+    var dfs = (i, j, board, word, index) => {
+        // 越界或者矩阵该位置值不等于字母值，返回false
+        if(i<0 || i>=row || j<0 || j>=col || board[i][j]!=word[index]) return false;
+        // 执行到这条语句说明矩阵该位置值已经等于字母值，需要往下继续找
+        if(index == word.length-1) return true;
+        // 保存当前位置值
+        var temp = board[i][j];
+        // 避免重复使用当前位置
+        board[i][j] = '';
+        // 下 右 上 左 递归寻找下一个字母的位置
+        var res = dfs(i+1, j, board, word, index+1) || dfs(i, j+1, board, word, index+1) || dfs(i-1, j, board, word, index+1) || dfs(i, j-1, board, word, index+1)
+        // 递归完众神归位
+        board[i][j] = temp;
+        return res
+    }
+
+    for(var i = 0; i < row; i++) {
+        for(var j = 0; j < col; j++) {
+            // 此处的0代表word的首字母，即开始查找第一个位置
+            if( dfs(i, j, board, word, 0) ) return true
+        }
+    }
+    return false
+};
+```
+
+加：机器人的运动范围
+
+```js
+题目：
+
+地上有一个 m 行和 n 列的方格。一个机器人从坐标 0,0 的格子开始移动，每一次只能向左，右，上，下四个方向移动一格，但是不能
+进入行坐标和列坐标的数位之和大于 k 的格子。 例如，当 k 为 18 时，机器人能够进入方格（35,37），因为 3+5+3+7 = 18。但是
+，它不能进入方格（35,38），因为 3+5+3+8 = 19。请问该机器人能够达到多少个格子？
+
+解题思路：
+跟上题类似，使用典型的dfs算法。
+
+var movingCount = function(m, n, k) {
+    var count = 0;    // 计数
+    var obj = {};     // 用来存放已经走过的格子
+    var dfs = (i, j) => {
+        if(i<0 || i>=m || j<0 || j>=n || sum(i,j)>k) return count;  // 边界条件
+        var target = JSON.stringify([i,j]);
+        if(!obj[target]) {    // 如果是没走过的格子，计数+1，且存到对象里
+            obj[target] = true;
+            count++;
+        }else {         // 如果是走过的格子，返回当前计数值
+            return count;
+        }
+        dfs(i+1, j);
+        dfs(i, j+1);
+        dfs(i-1, j);
+        dfs(i, j-1);
+    }
+
+    function sum(i, j) {   // 用来求数字之和的函数
+        var arr1 = i.toString().split('');
+        var num1 = arr1.reduce((pre, cur) => {return pre+cur*1}, 0);
+        var arr2 = j.toString().split('');
+        var num2 = arr2.reduce((pre, cur) => {return pre+cur*1}, 0);
+        return num1+num2;
+    }
+    // 初始位置开始调用
+    dfs(0, 0);
+    return count;
+};
+```
+
+加：剪绳子
+
+```js
+题目：
+
+给你一根长度为 n 的绳子，请把绳子剪成整数长度的 m 段（m、n都是整数，n>1并且m>1），每段绳子的长度记为 k[0],k[1]...k[m-1] 。请问 k[0]*k[1]*...*k[m-1] 可能的最大乘积是多少？例如，当绳子的长度是8时，我们把它剪成长度分别为2、3、3的三段，此时得到的最大乘积是18。
+
+思路一：动态规划
+这题用动态规划是比较好理解的
+
+1）我们想要求长度为n的绳子剪掉后的最大乘积，可以从前面比n小的绳子转移而来
+2）用一个长度为n+1的dp数组记录从0到n长度的绳子剪掉后的最大乘积，也就是dp[i]表示长度为i的绳子剪成m段后的最大乘积
+3）我们先把绳子剪掉第一段（长度为j）
+4）剪了第一段后，剩下(i - j)长度可以剪也可以不剪。如果不剪的话长度乘积即为j * (i - j)；如果剪的话长度乘积即为j * dp[i - j]。
+5）第一段长度j可以取的区间为[1,Math.ceil(i/2)]，对所有j不同的情况取最大值，因此最终dp[i]的转移方程为
+		dp[i] = max(dp[i], j * (i - j), j * dp[i - j])
+6) 最后返回dp[n]即可
+
+var cuttingRope = function(n) {
+    // 动态规划解法，新建一个长度为n+1的dp数组
+    var dp = new Array(n+1).fill(1);
+    // dp[2]=1，从dp[3]开始计算
+    for(var i = 3; i <= n; i++) {
+        // 依次取第一刀的位置，取到一半就够，后面的会重复
+        for(var j = 1; j < Math.ceil(i/2); j++) {
+            // 分两种情况：1.后面不再剪了，则值为j*(i-j)；2.后面继续剪，值为j*dp[i-j]（动态规划）
+            dp[i] = Math.max(dp[i], j*(i-j), j*dp[i-j]);
+        }    
+    }
+    return dp[n];
+};
+
+
+思路二：贪心算法，具体看力扣收藏题解。https://leetcode-cn.com/problems/jian-sheng-zi-lcof/solution/mian-shi-ti-14-i-jian-sheng-zi-tan-xin-si-xiang-by/
+力扣上此题给出了提示：多试试几个例子，找出规律。下面说下我找规律的思路。
+
+前面提到：8 拆分为 3+3+2，此时乘积是最大的。然后就推测出来一个整数，要拆成多个 2 和 3 的和，保证乘积最大。原理很容易理解，因为 2 和 3 可以合成任何数字，例如5=2+3，但是5 < 2*3；例如6=3+3，但是6<3*3。所以根据贪心算法，就尽量将原数拆成更多的 3，然后再拆成更多的 2，保证拆出来的整数的乘积结果最大。
+
+但上面的解法还有不足。如果整数 n 的形式是 3k+1，例如 7。按照上面规则，会拆分成“3 + 3 + 1”。但是在乘法操作中，1 是没作用的。此时，应该将 1 和 3 变成 4，也就是“3 + 3 + 1”变成“3 + 4”。此时乘积最大。
+
+综上所述，算法的整体思路是：
+
+n 除 3 的结果为 a，余数是 b
+当 b 为 0，直接将 a 个 3 相乘
+当 b 为 1，将（a-1）个 3 相乘，再乘以 4
+当 b 为 2，将 a 个 3 相乘，再乘以 2
+空间复杂度是 O(1)，时间复杂度是 O(1)。
+
+var cuttingRope = function(n) {
+    // 贪心算法解法
+    if(n <= 3) return n-1;
+    var m = Math.floor(n / 3);
+    var q = n % 3;
+    if(q === 0) return Math.pow(3,m);
+    if(q === 1) return Math.pow(3,m-1)*4;
+    if(q === 2) return Math.pow(3,m)*2;
+};
+
+```
+
+
+
 10. 矩形覆盖
 
 ```
@@ -236,34 +543,88 @@ f(n) =  | 1 ,(n=1 )
 
 11. 二进制中 1 的个数
 
-```
+```js
 
 题目：
 
 输入一个整数，输出该数二进制表示中 1 的个数。其中负数用补码表示。
+
+方法一：循环检查二进制位
+
+思路
+我们可以直接循环检查给定整数 nn 的二进制位的每一位是否为 11。
+具体代码中，当检查第 i 位时，我们可以让 n与 2^i进行与运算，当且仅当 n 的第 i 位为 1 时，运算结果不为 0。
+  var hammingWeight = function(n) {
+      var count = 0;
+      var flag = 1;
+      for(var i = 0; i < 32; i++) {
+          if(n & flag) {
+              count++;
+          }
+          flag = flag << 1
+      }
+      return count
+	};
+
+复杂度分析：
+时间复杂度：O(k)，其中 k 是 int 型的二进制位数，k=32。我们需要检查 n 的二进制位的每一位，一共需要检查 32 位。
+空间复杂度：O(1)，我们只需要常数的空间保存若干变量。
 
 思路：
 
 一个不为 0 的整数的二进制表示，一定会有一位为 1。我们找到最右边的一位 1，当我们将整数减去 1 时，最右边的一位 1 变为 0，它后
 面的所有位都取反，因此将减一后的值与原值相与，我们就会能够消除最右边的一位 1。因此判断一个二进制中 1 的个数，我们可以判
 断这个数可以经历多少次这样的过程。
-
+在实际代码中，我们不断让当前的 n 与 n - 1 做与运算，直到 n 变为 0 即可。因为每次运算会使得 n 的最低位的 1 被翻转，因此运算次数就等于 n 的二进制位中 1 的个数。
 如：1100&1011=1000
+  var hammingWeight = function(n) {
+      var count = 0;
+      while(n) {
+          n &= n-1;
+          count++;
+      }
+      return count
+  };
+
+复杂度分析：
+时间复杂度：O(logn)。循环次数等于 n 的二进制位中 1 的个数，最坏情况下 n 的二进制位全部为 1。我们需要循环 logn 次。
+空间复杂度：O(1)，我们只需要常数的空间保存若干变量。
 
 ```
 
 12. 数值的整数次方
 
-```
+```js
 
 题目：
 
 给定一个 double 类型的浮点数 base 和 int 类型的整数 exponent。求 base 的 exponent 次方。
 
-思路：
+解题思路：
+使用递归的方法：
+n=0时，任何x都返回1
+n=1时，返回x
+n=-1时，返回1/x
 
-首先我们需要判断 exponent 正负和零取值三种情况，根据不同的情况通过递归来实现。
+对于其他n值：
+当n为偶数时，myPow(x,n) = myPow(x,n/2)* myPow(x,n/2)
+当n为奇数时：myPow(x,n) = myPow(x,(n-1)/2) * myPow(x,(n-1)/2) * x
+注意：递归时先用一个变量取得myPow(x,n/2)的值再平方，可以降低时间复杂度（减少递归调用的次数）
 
+var myPow = function(x, n) {
+    if(n === 0) return 1;
+    if(n === 1) return x;
+    // 对于x为负数的情况的边界条件
+    if(n === -1) return 1/x;
+    if(n%2===0){
+        let a = myPow(x,n/2);
+        return a * a
+    }
+    else{
+        let b = myPow(x,(n-1)/2);
+        return b*b*x
+    }
+}
 ```
 
 13. 调整数组顺序使奇数位于偶数前面
@@ -796,7 +1157,7 @@ HZ 偶尔会拿些专业问题来忽悠那些非计算机专业的同学。今�
 
 40. 数组中只出现一次的数字
 
-```
+```js
 
 题目：
 
@@ -812,6 +1173,90 @@ HZ 偶尔会拿些专业问题来忽悠那些非计算机专业的同学。今�
 B 不同的位。我们取异或结果的第一个 1 所在的位数，假如是第 3 位，接着通过比较第三位来将数组分为两组，相同数字一定会
 被分到同一组。分组完成后再按照依次异或的思路，求得剩余数字即为两个只出现一次的数字。
 
+var singleNumbers = function(nums) {
+    var p = 0;
+    var n = 1; 
+    var x = 0, y = 0  // 代表根据第n位分出的两个子数组中只出现一次的具体数字
+    // 获取数组所有元素异或的值
+    for(var i = 0; i < nums.length; i++) {
+        p ^= nums[i];
+    }
+    // 用来查找数字异或值中第一个1出现的位置
+    while((p & n) === 0) {
+        n = n * 2;
+    }
+    // 数组分组，找出两个子数组中只出现一次的数字
+    for(var j = 0; j < nums.length; j++) {
+        var temp = nums[j];
+        if((temp & n) === 0) {
+            x ^= temp;
+        }else {
+            y ^= temp;
+        }
+    }
+    return [x,y];
+};
+
+类似题还有很多，请参考：https://leetcode-cn.com/problems/shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-lcof/solution/zhi-chu-xian-yi-ci-de-shu-xi-lie-wei-yun-suan-by-a/
+```
+
+补：数组中只出现一次的数字II
+
+```js
+题目：
+
+给你一个整数数组 nums ，除某个元素仅出现一次外，其余每个元素都恰出现三次 。请你找出并返回那个只出现了一次的元素。
+
+示例 1：
+输入：nums = [2,2,3,2]
+输出：3
+
+示例 2：
+输入：nums = [0,1,0,1,0,1,99]
+输出：99
+
+思路：
+
+为了方便叙述，我们称「只出现了一次的元素」为「答案」。
+
+由于数组中的元素都在 int（即32位整数）范围内，因此我们可以依次计算答案的每一个二进制位是 0 还是 1。
+
+具体地，考虑答案的第 i 个二进制位（i 从 0 开始编号），它可能为 0 或 1。对于数组中非答案的元素，每一个元素都出现了 3 次，对应着第 i 个二进制位的 3 个 0 或 3 个 1，无论是哪一种情况，它们的和都是 3 的倍数（即和为 0 或 3）。因此：
+
+答案的第 i 个二进制位就是数组中所有元素的第 i 个二进制位之和除以 3 的余数。
+
+这样一来，对于数组中的每一个元素 x，我们把数组中的所有数字的二进制表示的每一位都加起来。如果某一位的和能被3整除，那么那个只出现一次的数字二进制表示中对应的那一位是0；否则就是1。
+
+var singleNumber = function(nums) {
+    // 创建一个长度为32的数组用来记录每个item的每位相加的和
+    var arr = new Array(32).fill(0);
+    // 外层循环遍历每个元素
+    for(var i = 0; i < nums.length; i++) {
+        var target = 1;
+        // 内层循环将元素转为二进制数，并统计到创建的数组中
+        // 使用降序的原因是便于后面计算唯一数时的左移操作
+        for(var j = 31; j >= 0; j--) {
+            var bit = nums[i] & target;
+            if(bit != 0) {
+                arr[j] += 1;
+            }
+            target = target << 1;
+        }
+    }
+    var res = 0;
+    for(var i = 0; i < 32; i++) {
+        res = res << 1;
+        // 如果取余结果不为0，则说明该位出现了唯一数
+        if(arr[i] % 3 != 0) {
+            res += 1; 
+        }
+    }
+    return res;
+};
+
+复杂度分析：
+时间复杂度：O(n)
+空间复杂度：O(1)
 ```
 
 41. 和为 S 的连续正数序列
@@ -1236,28 +1681,7 @@ Q 为 12，K 为 13。上面的 5 张牌就可以变成“1,2,3,4,5”（大小�
 
 ```
 
-65. 矩阵中的路径（待深入理解）
-
-```
-题目：
-
-请设计一个函数，用来判断在一个矩阵中是否存在一条包含某字符串所有字符的路径。路径可以从矩阵中的任意一个格子开始，每
-一步可以在矩阵中向左，向右，向上，向下移动一个格子。如果一条路径经过了矩阵中的某一个格子，则该路径不能再进入该格子
-。例如 a b c e s f c s a d e e 矩阵中包含一条字符串"bcced"的路径，但是矩阵中不包含"abcb"路径，因为字符串的
-第一个字符 b 占据了矩阵中的第一行第二个格子之后，路径不能再次进入该格子。
-```
-
-66. 机器人的运动范围（待深入理解）
-
-```
-题目：
-
-地上有一个 m 行和 n 列的方格。一个机器人从坐标 0,0 的格子开始移动，每一次只能向左，右，上，下四个方向移动一格，但是不能
-进入行坐标和列坐标的数位之和大于 k 的格子。 例如，当 k 为 18 时，机器人能够进入方格（35,37），因为 3+5+3+7 = 18。但是
-，它不能进入方格（35,38），因为 3+5+3+8 = 19。请问该机器人能够达到多少个格子？
-```
-
-剑指 offer 相关资料可以参考：
+65. 剑指 offer 相关资料可以参考：
 
 - [《剑指 offer 题目练习及思路分析》](https://blog.csdn.net/zzl819954692/article/details/79648054)
 - [《JS 版剑指 offer》](https://www.cnblogs.com/wuguanglin/p/code-interview.html)
@@ -1272,7 +1696,7 @@ Q 为 12，K 为 13。上面的 5 张牌就可以变成“1,2,3,4,5”（大小�
 1. 明星问题
    ```
    题目：
-
+   
    有 n 个人，其中一个明星和 n-1 个群众，群众都认识明星，明星不认识任何群众，群众和群众之间的认识关系不知道，现有一个
    函数 foo(A, B)，若 A 认识 B 返回 true，若 A 不认识 B 返回 false，试设计一种算法找出明星，并给出时间复杂度。
    ```

@@ -76,7 +76,7 @@ CommonJS是唯一的双端模块化规范
     module1.bar()
     module2()
     module3.foo()
-    module3.bar()
+    module3.bar() 
     
     let arr = [1,11,2,2,2,5,5,5,3,4,6,6,9,7,8]
     console.log(a(arr));
