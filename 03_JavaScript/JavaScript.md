@@ -76,7 +76,7 @@
 - [70. documen.write 和 innerHTML 的区别？](#70-documenwrite-和-innerhtml-的区别)
 - [71. DOM 操作——怎样添加、移除、移动、复制、创建和查找节点？](#71-dom-操作怎样添加移除移动复制创建和查找节点)
 - [72. innerHTML 与 outerHTML 的区别？](#72-innerhtml-与-outerhtml-的区别)
-- [73. .call() 和 .apply() 的区别？](#73-call-和-apply-的区别)
+- [73. call() 、 apply() 和 bind() 的区别？](#73-call--apply-和-bind-的区别)
 - [74. JavaScript 类数组对象的定义？](#74-javascript-类数组对象的定义)
 - [75. 数组和对象有哪些原生方法，列举一下？](#75-数组和对象有哪些原生方法列举一下)
 - [76. 数组的 fill 方法？](#76-数组的-fill-方法)
@@ -413,6 +413,8 @@ null === undefined   // false   数据类型不同
     3. 如果还没有找到返回undefined
     4. 原型链： 沿着__proto__查找属性(方法)的这条链就是原型链
 ```
+
+
 
 详细资料可以参考：
 [《JavaScript 深入理解之原型与原型链》](http://cavszhouyou.top/JavaScript%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E4%B9%8B%E5%8E%9F%E5%9E%8B%E4%B8%8E%E5%8E%9F%E5%9E%8B%E9%93%BE.html)
@@ -1704,15 +1706,21 @@ innerText：内部文本，content ；
 outerText：内部文本，content ；
 ```
 
-#### 73. .call() 和 .apply() 的区别？
+#### 73. call() 、 apply() 和 bind() 的区别？
 
 ```
-它们的作用一模一样，区别仅在于传入参数的形式的不同。
+call,apply,bind()三者都用于改变函数的this对象的指向。
+bind 是返回对应函数，便于稍后调用；apply 、call 则是立即调用。
+call和apply的作用一模一样，区别仅在于传入参数的形式的不同。
 
 apply 接受两个参数，第一个参数指定了函数体内 this 对象的指向，第二个参数为一个带下标的集合，这个集合可以为数组，也可以为类数组，apply 方法把这个集合中的元素作为参数传递给被调用的函数。
 
 call 传入的参数数量不固定，跟 apply 相同的是，第一个参数也是代表函数体内的 this 指向，从第二个参数开始往后，每个参数被依次传入函数。
+
+bind 
 ```
+
+
 
 详细资料可以参考：
 [《apply、call 的区别和用途》](https://juejin.im/entry/58d0a7b22f301e007e5a15ae)
